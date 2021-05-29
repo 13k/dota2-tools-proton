@@ -1,0 +1,6 @@
+.env*
+.git
+.mypy_cache
+.vscode
+__pycache__
+/tmp

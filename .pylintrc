@@ -1,0 +1,22 @@
+[MASTER]
+init-hook='import os, sys; sys.path.insert(0, os.path.join(os.getcwd(), "stubs")); print(sys.path)'
+
+[MESSAGES CONTROL]
+disable=missing-module-docstring,
+        missing-class-docstring,
+        missing-function-docstring,
+        C0330,
+        C0326
+
+[FORMAT]
+max-line-length=98
+indent-string='    '
+
+[BASIC]
+good-names=i,
+           j,
+           k,
+           f,
+           ex,
+           Run,
+           _
