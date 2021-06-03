@@ -20,13 +20,12 @@ appdirs = "^1.4.4"
 vdf = "^3.3"
 
 [tool.poetry.dev-dependencies]
-black = "^21.4b2"
+black = "^21.5b2"
 isort = "^5.8.0"
 mypy = "^0.812"
 ptpython = "^3.0.17"
-pylint = "^2.8.2"
+pylint = "^2.8.3"
 rope = "^0.19.0"
-flake8 = "^3.9.1"
 
 [tool.black]
 line-length = 98
@@ -51,9 +50,10 @@ exclude = '''
 '''
 
 [tool.isort]
-ensure_newline_before_comments = true
-force_grid_wrap = 0
-include_trailing_comma = true
-line_length = 88
-multi_line_output = 3
-use_parentheses = true
+profile = "black"
+
+[tool.pylint.messages_control]
+disable = "C0330, C0326"
+
+[tool.pylint.format]
+max-line-length = 98
