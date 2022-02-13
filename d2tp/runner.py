@@ -42,16 +42,17 @@ class Runner:  # pylint: disable=too-many-instance-attributes
         self.build: Build = build
         self.game: Dota2 = game
         self.proton, self.compatdata, self.session = self.build.start_session()
-        self._wine_bin: PosixPath = PosixPath(self.proton.wine_bin + "64")
+        self._wine_bin: PosixPath = PosixPath(self.proton.wine64_bin)
+        self._prefix_path = Path(self.compatdata.prefix_dir)
         self._proton_game_path: PureWindowsPath | None = None
 
         self._start_session()
 
     def _start_session(self) -> None:
-        prefix_path = Path(self.compatdata.prefix_dir)
-        game_drive = prefix_path / "dosdevices" / "g:"
+        game_drive = self._prefix_path.joinpath("dosdevices", "g:")
 
         if not game_drive.exists():
+            game_drive.parent.mkdir(parents=True, exist_ok=True)
             game_drive.symlink_to(self.game.path)
 
     @property

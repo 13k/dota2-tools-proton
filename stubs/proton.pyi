@@ -9,6 +9,7 @@ class Proton:
     default_pfx_dir: str
     user_settings_file: str
     wine_bin: str
+    wine64_bin: str
     wineserver_bin: str
     def __init__(self, base_dir: str) -> None: ...
     def need_tarball_extraction(self) -> bool: ...
@@ -27,7 +28,7 @@ class CompatData:
 class Session:
     env: dict
     def init_wine(self) -> None: ...
-    def init_session(self) -> None:
+    def init_session(self, update_prefix_files: bool) -> None:
         """
         Initializes proton session.
 

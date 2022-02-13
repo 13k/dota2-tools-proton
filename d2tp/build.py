@@ -115,6 +115,6 @@ class Build:
         if self.proton.missing_default_prefix():
             self.proton.make_default_prefix()
 
-        self.session.init_session()
+        self.session.init_session(False)
 
         return self.proton, self.compatdata, self.session
