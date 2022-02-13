@@ -1,9 +1,24 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any, Final, NamedTuple, Type, TypeVar
 
 ProtonVersionT = TypeVar("ProtonVersionT", bound="ProtonVersion")
+
+VERSION_RE: Final = re.compile(
+    r"""
+    \A
+    (?P<major>\d+)
+    \.
+    (?P<minor>\d+)
+    -
+    (?P<prefix_major>\d+)
+    (?P<prefix_minor>\w+)?
+    \Z
+    """,
+    re.VERBOSE,
+)
 
 ERRF_INVALID_VERSION_FILE: Final = "Invalid proton version file {file}"
 ERRF_INVALID_VERSION_STRING: Final = "Invalid proton version string in file {file}: {version!r}"
@@ -14,23 +29,31 @@ class ProtonVersion(NamedTuple):
 
     major: int
     minor: int
-    prefix: int
+    prefix_major: int
+    prefix_minor: str
 
     @classmethod
     def parse(cls: Type[ProtonVersionT], value: str | Any) -> ProtonVersionT | None:
         if not isinstance(value, str):
             return None
 
-        if "-" not in value:
+        match = VERSION_RE.match(value)
+
+        if match is None:
             return None
 
-        if "." not in value:
-            return None
+        groups = match.groupdict()
+        major = int(groups["major"])
+        minor = int(groups["minor"])
+        prefix_major = int(groups["prefix_major"])
+        prefix_minor = "" if groups["prefix_minor"] is None else groups["prefix_minor"]
 
-        proton, prefix = value.split("-", 1)
-        major, minor = proton.split(".", 1)
-
-        return cls(int(major), int(minor), int(prefix))
+        return cls(
+            major=major,
+            minor=minor,
+            prefix_major=prefix_major,
+            prefix_minor=prefix_minor,
+        )
 
     @classmethod
     def parse_file(cls: Type[ProtonVersionT], file: Path) -> ProtonVersionT:
@@ -48,6 +71,4 @@ class ProtonVersion(NamedTuple):
         return version
 
     def __str__(self) -> str:
-        # pylint: disable=missing-format-attribute
-        return "{0.major}.{0.minor}-{0.prefix}".format(self)
-        # pylint: enable=missing-format-attribute
+        return "{0.major}.{0.minor}-{0.prefix_major}{0.prefix_minor}".format(self)

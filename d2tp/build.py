@@ -10,7 +10,7 @@ from .version import ProtonVersion
 if TYPE_CHECKING:
     from proton import CompatData, Proton, Session  # pylint: disable=import-error
 
-PROTON_MIN_VERSION: Final[ProtonVersion] = ProtonVersion(6, 3, 2)
+PROTON_MIN_VERSION: Final = ProtonVersion(6, 3, 2, "")
 
 PROTON_FILES: Final[list[tuple[str, str | None]]] = [
     ("filelock.py", None),
