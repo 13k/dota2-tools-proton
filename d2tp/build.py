@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Final
 from .version import ProtonVersion
 
 if TYPE_CHECKING:
-    from proton import CompatData, Proton, Session  # pylint: disable=import-error
+    from proton import CompatData, Proton, Session
 
 PROTON_MIN_VERSION: Final = ProtonVersion(6, 3, 2, "")
 

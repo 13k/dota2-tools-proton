@@ -1,5 +1,5 @@
 [MASTER]
-init-hook='import os, sys; sys.path.insert(0, os.path.join(os.getcwd(), "stubs")); print(sys.path)'
+init-hook='import os, sys; sys.path.insert(0, os.path.join(os.getcwd(), "stubs"))'
 
 [MESSAGES CONTROL]
 disable=missing-module-docstring,

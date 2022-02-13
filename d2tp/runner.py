@@ -8,30 +8,24 @@ from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, overload
 
 from .build import Build
-from .custom_game import CustomGame
 from .dota2 import Dota2
 
 if TYPE_CHECKING:
-    from proton import CompatData, Proton, Session  # pylint: disable=import-error
+    from proton import CompatData, Proton, Session
 
 
 def debug_cmd(
     cmd: list[str],
     cwd: str | PosixPath | None = None,
-    env: dict[str, str] | None = None,
+    env: dict[str, str] | None = None,  # pylint: disable=unused-argument
 ) -> None:
-    print("running {!r}".format(cmd))
+    print(f"running {cmd!r}")
 
     if cwd is not None:
-        print("  cwd={cwd}".format(cwd=cwd))
-
-    # if env is not None:
-    #     print("  env:")
-    #     for key, value in env.items():
-    #         print("    {key}={value!r}".format(key=key, value=value))
+        print(f"  {cwd=}")
 
 
-class Runner:
+class Runner:  # pylint: disable=too-many-instance-attributes
     """Proton runner"""
 
     proton: Proton
@@ -59,26 +53,6 @@ class Runner:
 
         if not game_drive.exists():
             game_drive.symlink_to(self.game.path)
-
-    def _setup_custom_game(self, custom_game: CustomGame) -> None:
-        if custom_game.content_path.exists():
-            if custom_game.content_path.is_symlink():
-                custom_game.content_path.unlink()
-            else:
-                raise ValueError(
-                    "Custom game directory already exists in dota's 'content' directory"
-                )
-
-        if custom_game.game_path.exists():
-            if custom_game.game_path.is_symlink():
-                custom_game.game_path.unlink()
-            else:
-                raise ValueError(
-                    "Custom game directory already exists in dota's 'game' directory"
-                )
-
-        custom_game.content_path.symlink_to(custom_game.src_content_path)
-        custom_game.game_path.symlink_to(custom_game.src_game_path)
 
     @property
     def proton_game_path(self) -> PureWindowsPath:
@@ -178,7 +152,7 @@ class Runner:
     ) -> None:
         custom_game = self.game.custom_game(name, src_path)
 
-        self._setup_custom_game(custom_game)
+        custom_game.setup()
 
         for path in custom_game.map_files:
             rel_path = path.relative_to(custom_game.src_content_path)

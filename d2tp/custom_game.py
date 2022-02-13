@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 ERRF_INVALID_ADDONINFO_FILE = "Invalid addoninfo file {file}: missing addon name key {name}"
 
 
-class CustomGame:
+class CustomGame:  # pylint: disable=too-many-instance-attributes
     def __init__(self, game: Dota2, name: str, src_path: str | PosixPath) -> None:
         self.game: Dota2 = game
         self.name: str = name
@@ -59,6 +59,26 @@ class CustomGame:
 
             if not path.match(self._maps_glob):
                 yield path
+
+    def setup(self) -> None:
+        if self.content_path.exists():
+            if self.content_path.is_symlink():
+                self.content_path.unlink()
+            else:
+                raise ValueError(
+                    "Custom game directory already exists in dota's 'content' directory"
+                )
+
+        if self.game_path.exists():
+            if self.game_path.is_symlink():
+                self.game_path.unlink()
+            else:
+                raise ValueError(
+                    "Custom game directory already exists in dota's 'game' directory"
+                )
+
+        self.content_path.symlink_to(self.src_content_path)
+        self.game_path.symlink_to(self.src_game_path)
 
 
 class AddonInfo(TypedDict):

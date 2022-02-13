@@ -71,4 +71,4 @@ class ProtonVersion(NamedTuple):
         return version
 
     def __str__(self) -> str:
-        return "{0.major}.{0.minor}-{0.prefix_major}{0.prefix_minor}".format(self)
+        return f"{self.major}.{self.minor}-{self.prefix_major}{self.prefix_minor}"

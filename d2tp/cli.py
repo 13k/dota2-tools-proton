@@ -32,12 +32,11 @@ def log(*args: str) -> None:
 
 def commands_help() -> str:
     max_cmd_len = max([len(cmd) for cmd in COMMANDS])
-    lines = [
-        "  {}{}".format(cmd.ljust(max_cmd_len + 4), cmd_help)
-        for cmd, cmd_help in COMMANDS.items()
-    ]
+    width = max_cmd_len + 4
+    lines = [f"  {cmd:{width}}{cmd_help}" for cmd, cmd_help in COMMANDS.items()]
+    help_text = "\n".join(lines)
 
-    return "commands:\n{}".format("\n".join(lines))
+    return f"commands:\n{help_text}"
 
 
 def epilog() -> str:
