@@ -7,9 +7,7 @@ name = "dota2-tools-proton"
 version = "0.1.0"
 description = "Dota 2 Workshop Tools using Proton"
 authors = ["Kiyoshi Murata <kbmurata@gmail.com>"]
-packages = [
-  { include = "d2tp" }
-]
+packages = [{ include = "d2tp" }]
 
 [tool.poetry.scripts]
 d2tp = 'd2tp.cli:main'
@@ -20,12 +18,12 @@ appdirs = "^1.4.4"
 vdf = "^3.3"
 
 [tool.poetry.dev-dependencies]
-black = "^21.5b2"
-isort = "^5.8.0"
-mypy = "^0.812"
-ptpython = "^3.0.17"
-pylint = "^2.8.3"
-rope = "^0.19.0"
+black = "^22.1"
+isort = "^5.10"
+mypy = "^0.931"
+ptpython = "^3.0"
+pylint = "^2.12"
+rope = "^0.22"
 
 [tool.black]
 line-length = 98
