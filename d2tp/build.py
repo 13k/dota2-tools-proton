@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sys
 from collections.abc import Generator
 from pathlib import Path
@@ -26,14 +27,29 @@ ERRF_PROTON_MIN_VERSION = (
 )
 
 
-class Build:
+class Build:  # pylint: disable=too-many-instance-attributes
     """Proton environment builder"""
 
-    def __init__(self, proton_path: Path, build_path: Path, prefix_path: Path) -> None:
-        self.proton_path: Path = proton_path
-        self.proton: Proton | None = None
-        self.compatdata: CompatData | None = None
-        self.session: Session | None = None
+    proton: Proton | None
+    compatdata: CompatData | None
+    session: Session | None
+    steam_path: Path
+    proton_path: Path
+    build_path: Path
+    prefix_path: Path
+
+    def __init__(
+        self,
+        steam_path: Path,
+        proton_path: Path,
+        build_path: Path,
+        prefix_path: Path,
+    ) -> None:
+        self.steam_path = steam_path
+        self.proton_path = proton_path
+        self.proton = None
+        self.compatdata = None
+        self.session = None
         self._proton_version: ProtonVersion | None = None
 
         self._validate_version()
@@ -61,6 +77,8 @@ class Build:
             )
 
     def _prepare(self) -> None:
+        os.environ["STEAM_COMPAT_CLIENT_INSTALL_PATH"] = str(self.steam_path)
+
         self.build_path.mkdir(parents=True, exist_ok=True)
         self.prefix_path.mkdir(parents=True, exist_ok=True)
 
@@ -115,6 +133,6 @@ class Build:
         if self.proton.missing_default_prefix():
             self.proton.make_default_prefix()
 
-        self.session.init_session(False)
+        self.session.init_session(True)
 
         return self.proton, self.compatdata, self.session

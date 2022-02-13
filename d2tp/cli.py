@@ -55,10 +55,19 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--steam-path",
+        "-s",
+        type=str,
+        required=True,
+        dest="steam_path",
+        help="Steam path",
+        metavar="PATH",
+    )
+
+    parser.add_argument(
         "--proton-path",
         "-p",
         type=str,
-        required=True,
         dest="proton_path",
         help="Proton path",
         metavar="PATH",
@@ -118,6 +127,13 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def resolve_proton_path(steam_path, value=None):
+    if value is None:
+        return steam_path.joinpath("steamapps", "common", "Proton 6.3")
+
+    return PosixPath(value).resolve()
+
+
 def main() -> NoReturn:
     """d2tp entrypoint"""
 
@@ -134,13 +150,20 @@ def main() -> NoReturn:
     elif args.verbosity == 1:
         APP_LOG.setLevel(INFO)
 
-    proton_path = Path(args.proton_path).resolve()
+    steam_path = PosixPath(args.steam_path).resolve()
+    proton_path = resolve_proton_path(steam_path, args.proton_path)
     game_path = PosixPath(args.game_path).resolve()
-    build_path = Path(args.build_path).resolve()
-    prefix_path = Path(args.prefix_path).resolve()
+    build_path = PosixPath(args.build_path).resolve()
+    prefix_path = PosixPath(args.prefix_path).resolve()
 
-    build = Build(proton_path=proton_path, build_path=build_path, prefix_path=prefix_path)
-    dota2 = Dota2(game_path)
+    build = Build(
+        steam_path=steam_path,
+        proton_path=proton_path,
+        build_path=build_path,
+        prefix_path=prefix_path,
+    )
+
+    dota2 = Dota2(path=game_path)
     runner = Runner(build=build, game=dota2)
 
     if args.cmd == "run":
