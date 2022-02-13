@@ -20,7 +20,8 @@ RUN set -exu && \
   python "${POETRY_HOME}/install-poetry.py" && \
   poetry --version
 
-COPY "poetry.lock" "pyproject.toml" "d2tp" .
+COPY "poetry.lock" "pyproject.toml" ./
+COPY "d2tp" ./d2tp
 
 RUN set -exu && \
   poetry build && \
