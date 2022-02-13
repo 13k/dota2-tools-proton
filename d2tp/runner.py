@@ -5,29 +5,24 @@ from collections.abc import Iterable
 from pathlib import Path, PosixPath, PurePath, PureWindowsPath
 from subprocess import CompletedProcess
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, Final, overload
 
 from .build import Build
 from .dota2 import Dota2
+from .log import Logger
 
 if TYPE_CHECKING:
     from proton import CompatData, Proton, Session
 
 
-def debug_cmd(
-    cmd: list[str],
-    cwd: str | PosixPath | None = None,
-    env: dict[str, str] | None = None,  # pylint: disable=unused-argument
-) -> None:
-    print(f"running {cmd!r}")
-
-    if cwd is not None:
-        print(f"  {cwd=}")
+LOG: Final = Logger(__name__)
 
 
 class Runner:  # pylint: disable=too-many-instance-attributes
     """Proton runner"""
 
+    build: Build
+    game: Dota2
     proton: Proton
     compatdata: CompatData
     session: Session
@@ -36,11 +31,9 @@ class Runner:  # pylint: disable=too-many-instance-attributes
         self,
         build: Build,
         game: Dota2,
-        debug: bool = False,
     ) -> None:
-        self.debug: bool = debug
-        self.build: Build = build
-        self.game: Dota2 = game
+        self.build = build
+        self.game = game
         self.proton, self.compatdata, self.session = self.build.start_session()
         self._wine_bin: PosixPath = PosixPath(self.proton.wine64_bin)
         self._prefix_path = Path(self.compatdata.prefix_dir)
@@ -105,8 +98,7 @@ class Runner:  # pylint: disable=too-many-instance-attributes
         cmd = [str(self._wine_bin), *args]
         env = self.session.env
 
-        if self.debug:
-            debug_cmd(cmd, cwd=cwd, env=env)
+        debug_cmd(cmd, cwd=cwd, env=env)
 
         return subprocess.run(
             cmd,
@@ -121,7 +113,7 @@ class Runner:  # pylint: disable=too-many-instance-attributes
         cmd = [
             str(self.game.compiler_path),
             "-game",
-            str(self.proton_game_path / "game" / "dota"),
+            str(self.proton_game_path.joinpath("game", "dota")),
         ]
 
         if force:
@@ -165,3 +157,13 @@ class Runner:  # pylint: disable=too-many-instance-attributes
         ]
 
         self.compile_filelist(asset_files, force=force)
+
+
+def debug_cmd(
+    cmd: list[str],
+    cwd: str | PosixPath | None = None,
+    env: dict[str, str] | None = None,  # pylint: disable=unused-argument
+) -> None:
+    LOG.debug("running %r", cmd)
+    LOG.debug("  cwd=%s", cwd)
+    LOG.trace("  env=%r", env)

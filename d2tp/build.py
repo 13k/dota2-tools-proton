@@ -38,8 +38,8 @@ class Build:
 
         self._validate_version()
 
-        self.build_path: Path = build_path / str(self.proton_version)
-        self.prefix_path: Path = prefix_path / str(self.proton_version)
+        self.build_path: Path = build_path.joinpath(str(self.proton_version))
+        self.prefix_path: Path = prefix_path.joinpath(str(self.proton_version))
 
         self._validate_files()
 
@@ -84,8 +84,8 @@ class Build:
             if dstname is None:
                 dstname = srcname
 
-            src = self.proton_path / srcname
-            dst = self.build_path / dstname
+            src = self.proton_path.joinpath(srcname)
+            dst = self.build_path.joinpath(dstname)
 
             yield src, dst
 

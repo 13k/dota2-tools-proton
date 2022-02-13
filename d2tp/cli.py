@@ -7,10 +7,15 @@ from typing import Final, NoReturn
 
 from appdirs import AppDirs
 
-from . import APP_NAME, __version__
+from . import APP_NAME
+from . import LOG as APP_LOG
+from . import __version__
 from .build import Build
 from .dota2 import Dota2
+from .log import DEBUG, INFO, TRACE, Logger
 from .runner import Runner
+
+LOG: Final = Logger(__name__)
 
 COMMANDS: Final[dict[str, str]] = {
     "run": "Run a command within Proton's environment",
@@ -22,25 +27,17 @@ COMMANDS: Final[dict[str, str]] = {
 
 APP_DIRS = AppDirs(appname=APP_NAME)
 
-DEFAULT_BUILD_PATH: Final[Path] = Path(APP_DIRS.user_cache_dir) / "build"
-DEFAULT_WINE_PREFIX_PATH: Final[Path] = Path(APP_DIRS.user_cache_dir) / "prefix"
+DEFAULT_BUILD_PATH: Final[Path] = Path(APP_DIRS.user_cache_dir).joinpath("build")
+DEFAULT_WINE_PREFIX_PATH: Final[Path] = Path(APP_DIRS.user_cache_dir).joinpath("prefix")
 
 
-def log(*args: str) -> None:
-    print(*args, file=sys.stderr, flush=True)
-
-
-def commands_help() -> str:
+def epilog() -> str:
     max_cmd_len = max([len(cmd) for cmd in COMMANDS])
     width = max_cmd_len + 4
     lines = [f"  {cmd:{width}}{cmd_help}" for cmd, cmd_help in COMMANDS.items()]
     help_text = "\n".join(lines)
 
     return f"commands:\n{help_text}"
-
-
-def epilog() -> str:
-    return commands_help()
 
 
 def parse_args() -> argparse.Namespace:
@@ -51,10 +48,14 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
-    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
+    )
 
     parser.add_argument(
-        "--proton",
+        "--proton-path",
         "-p",
         type=str,
         required=True,
@@ -64,7 +65,7 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--game",
+        "--game-path",
         "-g",
         type=str,
         required=True,
@@ -74,7 +75,7 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--build",
+        "--build-path",
         "-b",
         type=str,
         dest="build_path",
@@ -103,12 +104,12 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--debug",
-        "-D",
-        action="store_true",
-        dest="debug",
-        default=False,
-        help="Enable debugging [default: %(default)s]",
+        "--verbose",
+        "-v",
+        action="count",
+        dest="verbosity",
+        default=0,
+        help="Be verbose (can be given multiple times to increase verbosity)",
     )
 
     parser.add_argument("cmd", type=str, help="Command")
@@ -123,22 +124,24 @@ def main() -> NoReturn:
     args = parse_args()
 
     if args.cmd not in COMMANDS:
-        log(f"Invalid command {args.cmd}")
+        LOG.error("Invalid command %s", args.cmd)
         sys.exit(1)
+
+    if args.verbosity >= 3:
+        APP_LOG.setLevel(TRACE)
+    elif args.verbosity == 2:
+        APP_LOG.setLevel(DEBUG)
+    elif args.verbosity == 1:
+        APP_LOG.setLevel(INFO)
 
     proton_path = Path(args.proton_path).resolve()
     game_path = PosixPath(args.game_path).resolve()
     build_path = Path(args.build_path).resolve()
     prefix_path = Path(args.prefix_path).resolve()
 
-    build = Build(
-        proton_path=proton_path,
-        build_path=build_path,
-        prefix_path=prefix_path,
-    )
-
+    build = Build(proton_path=proton_path, build_path=build_path, prefix_path=prefix_path)
     dota2 = Dota2(game_path)
-    runner = Runner(build=build, game=dota2, debug=args.debug)
+    runner = Runner(build=build, game=dota2)
 
     if args.cmd == "run":
         runner.run(*args.cmd_args)
