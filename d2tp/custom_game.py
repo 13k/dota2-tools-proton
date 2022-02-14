@@ -7,21 +7,30 @@ from typing import TYPE_CHECKING, TypedDict
 import vdf
 
 if TYPE_CHECKING:
-    from .dota2 import Dota2
+    from .game import Game
 
 ERRF_INVALID_ADDONINFO_FILE = "Invalid addoninfo file {file}: missing addon name key {name}"
 
 
 class CustomGame:  # pylint: disable=too-many-instance-attributes
-    def __init__(self, game: Dota2, name: str, src_path: str | PosixPath) -> None:
-        self.game: Dota2 = game
-        self.name: str = name
-        self.src_path: PosixPath = PosixPath(src_path).resolve()
-        self.src_content_path: PosixPath = self.src_path.joinpath("content")
-        self.src_game_path: PosixPath = self.src_path.joinpath("game")
-        self.addoninfo_file: PosixPath = self.src_game_path.joinpath("addoninfo.txt")
-        self.content_path: PosixPath = self.game.addons_content_path.joinpath(self.name)
-        self.game_path: PosixPath = self.game.addons_game_path.joinpath(self.name)
+    game: Game
+    name: str
+    src_path: PosixPath
+    src_content_path: PosixPath
+    src_game_path: PosixPath
+    addoninfo_file: PosixPath
+    content_path: PosixPath
+    game_path: PosixPath
+
+    def __init__(self, game: Game, name: str, src_path: str | PosixPath) -> None:
+        self.game = game
+        self.name = name
+        self.src_path = PosixPath(src_path).resolve()
+        self.src_content_path = self.src_path.joinpath("content")
+        self.src_game_path = self.src_path.joinpath("game")
+        self.addoninfo_file = self.src_game_path.joinpath("addoninfo.txt")
+        self.content_path = self.game.addons_content_path.joinpath(self.name)
+        self.game_path = self.game.addons_game_path.joinpath(self.name)
         self._addoninfo: AddonInfo | None = None
         self._maps_glob: str = str(PosixPath("**", "*.vmap"))
         self._assets_glob: str = str(PosixPath("**", "*"))

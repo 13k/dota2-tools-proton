@@ -5,7 +5,7 @@ from pathlib import PosixPath
 from .custom_game import CustomGame
 
 
-class Dota2:  # pylint: disable=too-few-public-methods
+class Game:  # pylint: disable=too-few-public-methods
     def __init__(self, path: str | PosixPath) -> None:
         self.path: PosixPath = PosixPath(path).resolve()
         self.content_path: PosixPath = self.path.joinpath("content")

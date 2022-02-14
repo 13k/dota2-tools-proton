@@ -8,7 +8,7 @@ from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, Final, overload
 
 from .build import Build
-from .dota2 import Dota2
+from .game import Game
 from .log import Logger
 
 if TYPE_CHECKING:
@@ -22,7 +22,7 @@ class Runner:  # pylint: disable=too-many-instance-attributes
     """Proton runner"""
 
     build: Build
-    game: Dota2
+    game: Game
     proton: Proton
     compatdata: CompatData
     session: Session
@@ -30,23 +30,29 @@ class Runner:  # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         build: Build,
-        game: Dota2,
+        game: Game,
     ) -> None:
+        LOG.debug("creating Runner")
+
         self.build = build
         self.game = game
         self.proton, self.compatdata, self.session = self.build.start_session()
-        self._wine_bin: PosixPath = PosixPath(self.proton.wine64_bin)
+        self._wine_bin = PosixPath(self.proton.wine64_bin)
         self._prefix_path = Path(self.compatdata.prefix_dir)
         self._proton_game_path: PureWindowsPath | None = None
 
-        self._start_session()
+        self._prepare()
 
-    def _start_session(self) -> None:
+    def _prepare(self) -> None:
+        LOG.debug("preparing")
+
         game_drive = self._prefix_path.joinpath("dosdevices", "g:")
 
         if not game_drive.exists():
             game_drive.parent.mkdir(parents=True, exist_ok=True)
             game_drive.symlink_to(self.game.path)
+
+            LOG.trace("  ln -s %s %s", self.game.path, game_drive)
 
     @property
     def proton_game_path(self) -> PureWindowsPath:

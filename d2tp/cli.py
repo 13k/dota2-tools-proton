@@ -10,9 +10,9 @@ from appdirs import AppDirs
 from . import APP_NAME
 from . import LOG as APP_LOG
 from . import __version__
-from .build import Build
-from .dota2 import Dota2
-from .log import DEBUG, INFO, TRACE, Logger
+from .build import PROTON_MIN_VERSION, Build
+from .game import Game
+from .log import Level, Logger
 from .runner import Runner
 
 LOG: Final = Logger(__name__)
@@ -25,10 +25,10 @@ COMMANDS: Final[dict[str, str]] = {
     "nativepath": "Converts a Proton path to native path",
 }
 
-APP_DIRS = AppDirs(appname=APP_NAME)
+APP_DIRS: Final = AppDirs(appname=APP_NAME)
 
-DEFAULT_BUILD_PATH: Final[Path] = Path(APP_DIRS.user_cache_dir).joinpath("build")
-DEFAULT_WINE_PREFIX_PATH: Final[Path] = Path(APP_DIRS.user_cache_dir).joinpath("prefix")
+DEFAULT_BUILD_PATH: Final = Path(APP_DIRS.user_cache_dir).joinpath("build")
+DEFAULT_PREFIX_PATH: Final = Path(APP_DIRS.user_cache_dir).joinpath("prefix")
 
 
 def epilog() -> str:
@@ -94,11 +94,11 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--prefix",
+        "--prefix-path",
         "-w",
         type=str,
         dest="prefix_path",
-        default=str(DEFAULT_WINE_PREFIX_PATH),
+        default=str(DEFAULT_PREFIX_PATH),
         help="Wine prefix path [default: %(default)s]",
         metavar="PATH",
     )
@@ -129,9 +129,15 @@ def parse_args() -> argparse.Namespace:
 
 def resolve_proton_path(steam_path, value=None):
     if value is None:
-        return steam_path.joinpath("steamapps", "common", "Proton 6.3")
+        min_version = f"{PROTON_MIN_VERSION.major}.{PROTON_MIN_VERSION.minor}"
+        return steam_path.joinpath("steamapps", "common", f"Proton {min_version}")
 
     return PosixPath(value).resolve()
+
+
+def validate_path(path: Path) -> None:
+    if not path.exists():
+        raise ValueError(f"Path {path} not found")
 
 
 def main() -> NoReturn:
@@ -144,17 +150,21 @@ def main() -> NoReturn:
         sys.exit(1)
 
     if args.verbosity >= 3:
-        APP_LOG.setLevel(TRACE)
+        APP_LOG.setLevel(Level.TRACE)
     elif args.verbosity == 2:
-        APP_LOG.setLevel(DEBUG)
+        APP_LOG.setLevel(Level.DEBUG)
     elif args.verbosity == 1:
-        APP_LOG.setLevel(INFO)
+        APP_LOG.setLevel(Level.INFO)
 
     steam_path = PosixPath(args.steam_path).resolve()
     proton_path = resolve_proton_path(steam_path, args.proton_path)
     game_path = PosixPath(args.game_path).resolve()
     build_path = PosixPath(args.build_path).resolve()
     prefix_path = PosixPath(args.prefix_path).resolve()
+
+    validate_path(steam_path)
+    validate_path(proton_path)
+    validate_path(game_path)
 
     build = Build(
         steam_path=steam_path,
@@ -163,8 +173,8 @@ def main() -> NoReturn:
         prefix_path=prefix_path,
     )
 
-    dota2 = Dota2(path=game_path)
-    runner = Runner(build=build, game=dota2)
+    game = Game(path=game_path)
+    runner = Runner(build=build, game=game)
 
     if args.cmd == "run":
         runner.run(*args.cmd_args)
