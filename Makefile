@@ -1,5 +1,6 @@
 DOCKER ?= docker
 IMAGE ?= d2tp
+VERSION ?= $(shell poetry version -s)
 
 .PHONY: help
 help: ## Show help
@@ -8,5 +9,6 @@ help: ## Show help
 clean: ## Remove image (env var: IMAGE)
 	$(DOCKER) image rm "$(IMAGE)"
 
-image: ## Build image (env var: IMAGE)
-	$(DOCKER) build -t "$(IMAGE)" .
+image: ## Build image (env vars: IMAGE, VERSION)
+	$(DOCKER) build --build-arg "D2TP_VERSION=$(VERSION)" -t "$(IMAGE):$(VERSION)" .
+	$(DOCKER) tag "$(IMAGE):$(VERSION)" "$(IMAGE):latest"
