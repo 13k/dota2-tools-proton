@@ -1,6 +1,11 @@
-.env*
-.git
-.mypy_cache
-.vscode
-__pycache__
+/build
+/dist
 /tmp
+
+/.env*
+/.git
+/.mypy_cache
+/.python-version
+/d2tp.spec
+
+__pycache__
