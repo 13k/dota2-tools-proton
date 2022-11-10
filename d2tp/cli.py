@@ -18,11 +18,26 @@ from .runner import Runner
 LOG: Final = Logger(__name__)
 
 COMMANDS: Final[dict[str, str]] = {
-    "run": "Run a command within Proton's environment",
-    "compile": "Run the Dota 2 Workshop Tools resource compiler",
-    "compile_custom_game": "Compile a custom game using the resource compiler",
-    "protonpath": "Converts a native path to Proton path",
-    "nativepath": "Converts a Proton path to native path",
+    "run": """Run a command within Proton's environment
+
+      run <command...>
+""",
+    "compile": """Run the Dota 2 Workshop Tools resource compiler
+
+      compile <args...>
+""",
+    "compile_custom_game": """Compile a custom game using the resource compiler
+
+      compile_custom_game <name> <src_path>
+""",
+    "protonpath": """Converts a native path to Proton path
+
+      protonpath <native_path>
+""",
+    "nativepath": """Converts a Proton path to native path
+
+      nativepath <proton_path>
+""",
 }
 
 APP_DIRS: Final = AppDirs(appname=APP_NAME)
