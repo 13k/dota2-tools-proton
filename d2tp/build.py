@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 LOG: Final = Logger(__name__)
 
-PROTON_MIN_VERSION: Final = ProtonVersion(6, 3, 2, "")
+PROTON_MIN_VERSION: Final = ProtonVersion(7, 0, 5, "")
 
 PROTON_FILES: Final[list[tuple[str, str | None]]] = [
     ("filelock.py", None),
