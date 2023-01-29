@@ -4,9 +4,7 @@ init-hook='import os, sys; sys.path.insert(0, os.path.join(os.getcwd(), "stubs")
 [MESSAGES CONTROL]
 disable=missing-module-docstring,
         missing-class-docstring,
-        missing-function-docstring,
-        C0330,
-        C0326
+        missing-function-docstring
 
 [FORMAT]
 max-line-length=98

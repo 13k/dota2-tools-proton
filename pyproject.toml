@@ -50,9 +50,3 @@ exclude = '''
 
 [tool.isort]
 profile = "black"
-
-[tool.pylint.messages_control]
-disable = "C0330, C0326"
-
-[tool.pylint.format]
-max-line-length = 98
