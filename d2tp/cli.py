@@ -47,7 +47,7 @@ DEFAULT_PREFIX_PATH: Final = Path(APP_DIRS.user_cache_dir).joinpath("prefix")
 
 
 def epilog() -> str:
-    max_cmd_len = max([len(cmd) for cmd in COMMANDS])
+    max_cmd_len = max(len(cmd) for cmd in COMMANDS)
     width = max_cmd_len + 4
     lines = [f"  {cmd:{width}}{cmd_help}" for cmd, cmd_help in COMMANDS.items()]
     help_text = "\n".join(lines)
