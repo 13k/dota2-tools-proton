@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "dota2-tools-proton"
-version = "0.3.0"
+version = "0.3.1"
 description = "Dota 2 Workshop Tools using Proton"
 authors = ["Kiyoshi Murata <kbmurata@gmail.com>"]
 packages = [{ include = "d2tp" }]
