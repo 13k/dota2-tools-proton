@@ -92,7 +92,7 @@ def parse_args() -> argparse.Namespace:
         "--game-path",
         "-g",
         type=str,
-        required=True,
+        required=False,
         dest="game_path",
         help="Dota 2 path",
         metavar="PATH",
@@ -149,6 +149,11 @@ def resolve_proton_path(steam_path, value=None):
 
     return PosixPath(value).resolve()
 
+def resolve_game_path(steam_path, value=None):
+    if value is None:
+        return steam_path.joinpath("steamapps", "common", "dota 2 beta")
+
+    return PosixPath(value).resolve()
 
 def validate_path(path: Path) -> None:
     if not path.exists():
@@ -173,7 +178,7 @@ def main() -> NoReturn:
 
     steam_path = PosixPath(args.steam_path).resolve()
     proton_path = resolve_proton_path(steam_path, args.proton_path)
-    game_path = PosixPath(args.game_path).resolve()
+    game_path = resolve_game_path(steam_path, args.game_path)
     build_path = PosixPath(args.build_path).resolve()
     prefix_path = PosixPath(args.prefix_path).resolve()
 
