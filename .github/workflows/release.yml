@@ -1,0 +1,101 @@
+name: release
+
+on:
+  push:
+    # TODO: remove `ci` branch
+    branches: [ci]
+    tags:
+      - "v*.*.*"
+
+jobs:
+  create-release:
+    name: create-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub release
+        id: release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          name: "${{ github.ref_name }}"
+          tag_name: "${{ github.ref_name }}"
+
+  build-release:
+    name: build-release
+    needs: ["create-release"]
+    runs-on: "${{ matrix.os }}"
+    strategy:
+      matrix:
+        build: [linux, macos, windows]
+        include:
+          - build: linux
+            os: ubuntu-latest
+          - build: macos
+            os: macos-latest
+          - build: windows
+            os: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # setup linux {{{
+
+      - name: Linux | Install packages
+        if: matrix.build == 'linux'
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: upx-ucl
+          version: 1.0
+
+      # }}}
+      # setup macos {{{
+
+      - name: macOS | Install packages
+        if: matrix.build = 'macos'
+        uses: tecolicom/actions-use-homebrew-tools@v1
+        with:
+          tools: upx
+
+      # }}}
+      # setup windows {{{
+
+      - name: Windows | Install packages
+        if: matrix.build == 'windows'
+        shell: pwsh
+        run: choco install -y upx
+
+      # }}}
+      # setup python {{{
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: poetry
+
+      # }}}
+      # build {{{
+
+      - name: Linux | Build release
+        if: matrix.build == 'linux'
+        run: ci/build-unix.sh "${{ matrix.target }}"
+
+      - name: macOS | Build release
+        if: matrix.build == 'macos'
+        run: ci/build-unix.sh "${{ matrix.target }}"
+
+      - name: Windows | Build release
+        if: matrix.build == 'windows'
+        shell: pwsh
+        run: ci/build-windows.ps1 "${{ matrix.target }}"
+
+      # }}}
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          name: "${{ github.ref_name }}"
+          tag_name: "${{ github.ref_name }}"
+          files: |
+            dist/d2tp*
