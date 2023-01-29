@@ -1,0 +1,31 @@
+name: ci
+
+on:
+  push:
+    # TODO: remove `ci` branch
+    branches: [$default-branch, ci]
+  pull_request:
+    branches: [$default-branch]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: poetry
+
+      - name: Check formatting
+        run: poetry run black --check d2tp
+
+      - name: Run pylint
+        run: poetry run pylint d2tp
+
+      - name: Run mypy
+        run: poetry run mypy d2tp
