@@ -3,7 +3,7 @@
 block_cipher = None
 
 a = Analysis(
-    ['d2tp/__main__.py'],
+    ["../d2tp/__main__.py", "analysis/_pyi_proton.py"],
     pathex=[],
     binaries=[],
     datas=[],
@@ -19,6 +19,8 @@ a = Analysis(
 )
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+print("[analysis] scripts:", a.scripts)
 
 exe = EXE(
     pyz,

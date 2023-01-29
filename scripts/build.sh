@@ -11,7 +11,7 @@ cd "$ROOT_DIR"
 pwd
 
 poetry install
-poetry run pyinstaller "d2tp.spec"
+poetry run pyinstaller "installer/d2tp.spec"
 
 cp "dist/d2tp" "${D2TP_BIN:?}"
 chmod 755 "$D2TP_BIN"
